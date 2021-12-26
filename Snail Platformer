@@ -1,0 +1,201 @@
+import pygame
+pygame.init()
+
+clock = pygame.time.Clock()
+
+size = width, height = 1000, 750
+screen = pygame.display.set_mode(size)
+ScreenRect = screen.get_rect()
+pygame.display.set_caption("Snail Platformer")
+
+#Game variables
+TileSize = 50
+
+
+
+#load background
+bg = pygame.image.load('bg.png')
+
+class Player():
+    def __init__(self, x, y):
+        self.SnailRight = []
+        self.SnailLeft = []
+        self.index = 0
+        self.counter = 0
+
+        for num in range(1, 3):
+            right = pygame.image.load(f'right{num}.png')
+            right = pygame.transform.scale(right, (128, 128))
+            left = pygame.transform.flip(right, True, False)
+            self.SnailRight.append(right)
+            self.SnailLeft.append(left)
+        self.image = self.SnailRight[self.index]      
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.width = self.image.get_width
+        self.height = self.image.get_height
+        self.vel_y = 0
+        self.jump = False
+        self.direct = 0
+
+    def draw(self):
+
+        x1 = 0
+        y1 = 0
+        Anim = 10
+
+        #move snail
+
+        Keys = pygame.key.get_pressed()
+
+        if Keys[pygame.K_LEFT]:
+            x1 -= 2
+            self.counter += 1
+            self.direct = -1
+
+        if Keys[pygame.K_RIGHT]:
+            x1 += 2
+            self.counter += 1
+            self.direct = 1
+
+
+        if Keys[pygame.K_LEFT] == False and Keys[pygame.K_RIGHT] == False:
+            self.counter = 0
+            self.index = 0
+            if self.direct == 1:
+                self.image = self.SnailRight[self.index]
+            if self.direct == -1:
+                self.image = self.SnailLeft[self.index]
+
+        if Keys[pygame.K_SPACE] or Keys[pygame.K_UP] and self.jump == False:
+            self.vel_y = -15
+            self.jump = True
+        if Keys[pygame.K_SPACE] or Keys[pygame.K_UP] == False:
+            self.jump = False        
+
+
+        #Animation
+        self.counter += 1
+        if self.counter > Anim:
+            self.counter = 0
+            self.index += 1
+            if self.index >= len(self.SnailRight):
+               self.index = 0
+            if self.direct == 1:
+                self.image = self.SnailRight[self.index]
+            if self.direct == -1:
+                self.image = self.SnailLeft[self.index]
+            
+        
+
+        #Gravity
+        self.vel_y += 1
+        if self.vel_y > 10:
+            self.vel_y = 10
+        y1 += self.vel_y
+
+
+        #Collision Detection
+        for tile in world.TileList:
+            if tile[1].colliderect(self.rect.x + x1, self.rect.y, self.width, self.height):
+                x1 = 0
+                if self.vel_y < 0:
+                    y1 = tile[1].bottom - self.rect.top
+                if self.vel_y >= 0:
+                    y1 = tile[1].top - self.rect.bottom
+            
+
+
+ 
+        self.rect.x += x1
+        self.rect.y += y1
+
+        if self.rect.bottom > height:
+            self.rect.bottom = height
+            y1 = 0
+
+        
+
+        #draw snail
+        screen.blit(self.image, self.rect)
+        pygame.draw.rect(screen, (255, 255, 255), self.rect, 2)
+
+
+
+class World():
+    def __init__(self, data):
+        self.TileList = []
+
+        #load platforms images
+        dirt = pygame.image.load('dirt.png')
+        grass = pygame.image.load('grass.png')
+
+        rowCount = 0
+        for row in data:
+            columnCount = 0
+            for tile in row:
+                if tile == 1:
+                    img = pygame.transform.scale(dirt, (TileSize, TileSize))
+                    img_rect = img.get_rect()
+                    img_rect.x = columnCount * TileSize
+                    img_rect.y = rowCount * TileSize
+                    tile = (img, img_rect)
+                    self.TileList.append(tile)
+                if tile == 2:
+                    img = pygame.transform.scale(grass, (TileSize, TileSize))
+                    img_rect = img.get_rect()
+                    img_rect.x = columnCount * TileSize
+                    img_rect.y = rowCount * TileSize
+                    tile = (img, img_rect)
+                    self.TileList.append(tile)
+                columnCount += 1
+            rowCount += 1
+
+    def draw(self):
+        for tile in self.TileList:
+            screen.blit(tile[0], tile[1])
+            pygame.draw.rect(screen, (255, 255, 255), tile[1], 2)
+
+WorldData = [
+[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], 
+[1, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 1], 
+[1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 2, 2, 1], 
+[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 7, 0, 5, 0, 0, 0, 1], 
+[1, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 1], 
+[1, 7, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], 
+[1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], 
+[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 7, 0, 0, 2, 2, 1], 
+[1, 0, 2, 0, 0, 7, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], 
+[1, 0, 0, 2, 0, 0, 4, 0, 0, 0, 0, 2, 0, 0, 3, 0, 0, 0, 0, 1],  
+[1, 0, 0, 0, 0, 0, 2, 2, 2, 6, 6, 6, 6, 6, 1, 1, 1, 1, 1, 1], 
+[1, 0, 0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+[1, 0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+[1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+]
+
+Snail = Player(25, height - 130) 
+world = World(WorldData)
+
+
+#main loop
+run = True
+while run:
+
+    clock.tick(60)
+
+    screen.blit(bg, (0, 0))
+
+    world.draw()
+
+    Snail.draw()
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False
+
+    pygame.display.update()
+
+pygame.quit()
+ 
