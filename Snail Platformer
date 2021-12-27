@@ -98,7 +98,7 @@ class Player():
 
         #Collision Detection
         for tile in world.TileList:
-            if tile[1].colliderect(self.rect.x + x1, self.rect.y, self.width, self.height):
+            if tile[1].colliderect(pygame.Rect(self.rect.x + x1, self.rect.y, self.width, self.height)):
                 x1 = 0
                 if self.vel_y < 0:
                     y1 = tile[1].bottom - self.rect.top
