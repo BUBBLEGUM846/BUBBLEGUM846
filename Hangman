@@ -1,0 +1,101 @@
+import random
+
+Hangman = ("""
+
+  ----¬
+  |   |
+      |
+      |
+      |
+______|_""", """
+
+  ----¬
+  |   |
+  O   |
+      |
+      |
+______|_""","""
+
+  ----¬
+  |   |
+  O   |
+  |   |
+      |
+______|_""","""
+
+  ----¬
+  |   |
+  O   |
+/ |   |
+      |
+______|_ ""","""
+
+  ----¬
+  |   |
+  O   |
+/ | \ |
+      |
+______|_""","""
+
+  ----¬
+  |   |
+  O   |
+/ | \ |
+ /    |
+______|_ ""","""
+
+  ----¬
+  |   |
+  O   |
+/ | \ |
+ / \  |
+______|_]""")
+
+
+Words = ['Aardvark', 'Buffalo', 'Chinchilla', 'Dolphin', 'Electric Eel', 'Frigatebird', 'Giant African Land Snail', 'Hippopotamus', 'Ibex', 'Jellyfish' ]
+  
+word = random.choice(Words)
+
+max = len(word)-1
+
+letters = ("_")*len(word)
+
+guesses = []
+
+incorrect = 0
+
+print("Hangman - A-Z of Animals")
+
+while incorrect < max and guesses != word:
+  print(Hangman[incorrect])
+  print("Word so far", letters)
+  print("Letters guessed", guesses)
+
+  Guess = input("Guess a letter: ")
+
+  while Guess in guesses:
+    print("Letter has already been guessed, please try again")
+    Guess = input("Guess a letter: ")
+  guesses.append(Guess)
+  
+  if Guess in word:
+    print("Well done!")
+
+    update = ""
+    for i in range(len(word)):
+      if Guess == word[i]:
+        update += Guess
+      else:
+        update += guesses[i]
+    guesses = update
+
+  else:
+     print("Incorrect, please try  again")
+     incorrect += 1
+
+if incorrect == max:
+  print("Better luck next time")
+
+
+else:
+  print("Well done!")
