@@ -1,0 +1,86 @@
+import pygame #Must import pygame first to use it
+pygame.font.init() #Initialise the font
+display = pygame.display.set_mode((500,500)) #Set the size of the window
+pygame.display.set_caption("*** SUDOKU ***") #Set the caption of the window which will be displayed at the top
+
+x = 0
+y = 0
+
+grid = 500 / 9 #The grid is 9 squares along and down each way and the size of the window is 500 each way, this separates the window into equal squares
+
+value = 0
+
+board = open('PuzzleN.txt','r').read() #Opening the file where the actual game board is held
+
+font = pygame.font.SysFont("arial", 40) #Setting the font and size 
+font1 = pygame.font.SysFont("arial", 20)
+
+#Loading in some images for the main menu buttons
+Start = pygame.image.load("StartButton.png") 
+Load = pygame.image.load("LoadButton.png")
+Quit = pygame.image.load("QuitButton.png")
+
+#Giving the buttons clickability (code from previous game I made)
+class Buttons():
+  def __init__(self,x,y,image):
+    self.image = image
+    self.rect = self.image.get_rect()
+    self.rect.x = x
+    self.rect.y = y
+    self.click = False
+
+  def Draw(self):
+    result = False
+
+    MPos = pygame.mouse.get_pos()
+
+    if self.rect.collidepoint(MPos):
+      if pygame.mouse.get_pressed()[0] == 1 and self.click == False:
+        result = True
+        self.click = True
+    if pygame.mouse.get_pressed()[0] == 0:
+      self.click = False
+
+    display.blit(self.image, self.rect)
+    return result
+        
+
+def Vari(pos):
+  global x
+  x = pos[0] // grid
+  global y
+  y = pos[1] // grid
+
+def SelectedBox(): #This section of code will highlight the selected box on the grid so the user has a clear sense of where they are putting a number down
+  for i in range(2):
+    #draw.line makes a straight line 
+    pygame.draw.line(display, (255,0,0), (x * grid - 3, (y + i) * grid), (x * grid + grid + 3, (y + i) * grid), 7)
+    #The line drawing draws around a square to highlight it
+    pygame.draw.line(display, (255,0,0), ((x + i) * grid, y * grid), ((x + i) * grid, y * grid + grid), 7)
+
+def draw():
+  for j in range(9):
+    for k in range(9):
+      if grid[j][k] != 0:
+        pygame.draw.rect(display, (0,153,153), (j * grid, grid + 1, grid + 1))
+        text = font1.render(str(board[j][k]), 1, (0,0,0))
+        display.blit(text, (j * grid + 15, k * grid + 15))
+
+  for l in range(10):
+    if l % 3 == 0:
+      thickness = 7
+    else:
+      thickness = 1
+
+    pygame.draw.line(display, (0,0,0), (0, l * grid), (500, l * grid), thickness)
+    pygame.draw.line(display, (0,0,0), (l * grid, 0),(l * grid, 500), thickness)
+
+def DrawValue():
+  text = font1.render(str(value), 1, (0,0,0))
+  display.blit(text, (x * grid + 15, y * grid + 15))
+
+def RaiseAnError():
+  text1 = font.render("Sorry that is incorrect", 1, (0, 0, 0))
+  display.blit(text1, (20, 570)) 
+
+def IsValid():
